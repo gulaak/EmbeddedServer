@@ -55,6 +55,7 @@
         <b-card-group deck>
         <b-card class="text-center" v-for="(column, idx_col) of row" :key="column">
             <b-card-text > 
+                Queue
                   <button  @click="open = true ; moreInfo(idx_row * 3 + idx_col)" style="border: None">
                     <b-icon icon="exclamation-circle-fill" variant="info" scale="1"></b-icon>
                   </button>
@@ -125,17 +126,17 @@ export default {
 
 
   mounted(){
-    this.socket = io.connect('http://bc614e814241.ngrok.io')
-    //this.socket = io.connect('http://10.0.0.72:5000')
+    //this.socket = io.connect("http://28508f90dbe1.ngrok.io")
+    this.socket = io.connect('http://localhost:5000')
     this.socket.on("peripheral status", (data) => { // update all the peripheral statuses 
-      console.log("In status")
-      console.log(data)  
+      //console.log("In status")
+      //console.log(data)  
       this.peripheral2D = this.convertObjectTo2D(data,3);
     });
 
     this.socket.on("queue add", (data) =>{
       this.queue.push(data);
-      console.log(data)
+      //console.log(data)
       this.queue2D = this.convertTo2D(this.queue,3);
     });
 
@@ -145,7 +146,7 @@ export default {
         switch(i){
           case 0: temp[i] = [data[i],"CPU"]; break;
           case 1: temp[i] = [data[i],"Avail"]; break;
-          case 2: temp[i] = [data[i],"Used"]; break;
+          case 2: temp[i] = [data[i-1] - data[i],"Used"]; break;
           default: temp[i] = [data[i],"Perc"]; break;
         }
         
@@ -159,7 +160,7 @@ export default {
       var time_obj = new Date()
       var timestamp = time_obj.getHours() + ":" + time_obj.getMinutes() + ":" + time_obj.getSeconds()
       this.stdout_list.push([data, timestamp])
-      if ( this.stdout_list.length > 6){
+      if ( this.stdout_list.length > 6){      
         this.stdout_list.shift();
       }
     })
@@ -174,7 +175,7 @@ export default {
     });
 
     this.socket.on("dispatch queue", (program_string) => {
-      console.log("dispatched")
+      //console.log("dispatched")
       for ( let [idx, item] of this.queue.entries()){
         if(item["program"] === program_string){
           this.queue.splice(idx,1);
@@ -200,11 +201,11 @@ export default {
         reader.readAsText(this.file1,"UTF-8");
         var socket = this.socket
         reader.onload = function(evt){
-          console.log(evt.target.result)
-          console.log(socket)
-          for(var i = 0; i < 100; ++i){
+          //console.log(evt.target.result)
+          //console.log(socket)
+          //for(var i = 0; i < 100; ++i){
             socket.emit('file message', evt.target.result, socket.id); // send socket ID to track which client sent a file.
-          }
+          ///}
         }
       }
       
@@ -222,13 +223,13 @@ export default {
     },
 
     moreInfo(idx){
-      console.log("Index: " + idx)
+      //console.log("Index: " + idx)
       this.program_data = this.queue[idx]["program"]
     },
 
 
     file_send_modal(){
-     // for(var i = 0; i < 100 ; ++i){
+      //for(var i = 0; i < 100 ; ++i){
         this.socket.emit('file message', this.modal_text, this.socket.id); // send program from modal to backend to program
       //}
       this.open_text = false
@@ -239,11 +240,11 @@ export default {
     },
 
     clearQueue(id){
-      console.log("Clear Queue")
+      //console.log("Clear Queue")
       let queue_obj = this.queue[id]
       this.queue.splice(id,1)
       this.queue2D = this.convertTo2D(this.queue,3);
-      console.log(this.queue2D)
+      //console.log(this.queue2D)
       this.socket.emit('clear queue', queue_obj);
       
     },
@@ -266,7 +267,7 @@ export default {
           temp[j].push(array[i])
         }
       }
-      console.log(temp)
+      //console.log(temp)
       return temp
     },
 
@@ -275,10 +276,10 @@ export default {
       var j = 0;
       var temp = []
       
-      console.log(object)
+      //console.log(object)
       for( const key in object){
         if (key == "_id" || key == "__v") continue; 
-        console.log(key)
+        //console.log(key)
         if ( i % (numOfRows) == 0){
           temp.push([])
           if (i != 0){
@@ -291,7 +292,7 @@ export default {
         }
         ++i;
       }
-     console.log(temp);
+     //console.log(temp);
      return temp;
     }
 
